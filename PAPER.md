@@ -60,14 +60,14 @@ The SoC partitions the silicon into three independent clock domains:
 2. **Interconnect Domain ($CLK_{noc} = 1.25\,\text{GHz}$):** Clocks the 2D-mesh packet routers and defect bypass multiplexers.
 3. **Memory & PIM Domain ($CLK_{mem} = 1.0\,\text{GHz}$):** Clocks the OpenHBM3 Base-Die PIM controller and TSV command dispatchers.
 
-Boundary crossings between these asynchronous domains are managed by dual-clock FIFO synchronizers (`ara_noc_cdc_fifo.sv`) utilizing circular Gray-code pointers. The Mean Time Between Failures ($MTBF$) is mathematically bounded by:
+Boundary crossings between these asynchronous domains are managed by dual-clock FIFO synchronizers (`rtl/ara_noc_cdc_fifo.sv`) utilizing circular Gray-code pointers. The Mean Time Between Failures ($MTBF$) is mathematically bounded by:
 $$MTBF = \frac{1}{f_{tx} \cdot f_{rx} \cdot T_w} \exp\left(\frac{t_{res}}{\tau}\right)$$
 
 As quantified in Figure 1, the dual-flop synchronizer provides an average transfer latency of $2.5\,\text{cycles}$ while sustaining an $MTBF > 10^8\,\text{years}$ across wide frequency variations ($0.8 \le f_{tx}/f_{rx} \le 1.25$).
 
 ### 2.2 4-Zone Staggered Power Delivery Network (PDN) Controller
 
-To eliminate inductive supply bounce, the SoC introduces a specialized hardware power sequencing unit (`ara_pdn_stagger_ctrl.sv`). The 16 cores are partitioned into four physical power domains (Zone 0 through Zone 3).
+To eliminate inductive supply bounce, the SoC introduces a specialized hardware power sequencing unit (`rtl/ara_pdn_stagger_ctrl.sv`). The 16 cores are partitioned into four physical power domains (Zone 0 through Zone 3).
 
 ![Figure 2: PDN Voltage Droop](figures/fig2_pdn_voltage_droop.png)
 
@@ -83,7 +83,7 @@ As demonstrated in Figure 2, the staggered activation dampens high-frequency rin
 
 ### 2.3 Hardware Barrier Synchronization Tree
 
-To minimize thread synchronization overhead, the SoC implements a dedicated hardware barrier tree (`ara_barrier_tree.sv`). Each cluster asserts a single-bit arrival line upon reaching a parallel barrier. A balanced reduction tree computes the global logical AND across all 16 cores and broadcasts a release signal in **2 clock cycles**, eliminating memory bus spin-polling.
+To minimize thread synchronization overhead, the SoC implements a dedicated hardware barrier tree (`rtl/ara_barrier_tree.sv`). Each cluster asserts a single-bit arrival line upon reaching a parallel barrier. A balanced reduction tree computes the global logical AND across all 16 cores and broadcasts a release signal in **2 clock cycles**, eliminating memory bus spin-polling.
 
 ---
 
@@ -118,13 +118,13 @@ Figure 4 presents the steady-state thermal profile under sustained full vector e
 
 The SoC includes a production-ready software environment:
 - **Linux Kernel Driver (`driver/`):** Provides `/dev/openhbm3_soc` character device interface, memory-mapped I/O (MMIO) register configuration, asynchronous interrupt handling for DMA completions, and hardware watchdog reset routines.
-- **Bare-Metal Runtime (`runtime/`):** Provides a high-performance C runtime library with lightweight synchronization primitives, barrier wait functions, and GEMM dispatchers (`openhbm3_soc_runtime.c`).
+- **Bare-Metal Runtime (`runtime/`):** Provides a high-performance C runtime library with lightweight synchronization primitives, barrier wait functions, and GEMM dispatchers (`runtime/libara_runtime.c` and `runtime/test_ara_runtime.c`).
 
 ### 4.2 Hardware Verification Regressions
 
 All testbenches verified clean under `vvp_strict.sh` with zero warnings:
-1. `tb_ara_noc_cdc_gals.sv`: 1,000,000 random-packet GALS transfers across asynchronous clock edges; zero corrupted flits.
-2. `tb_ara_wse_multi_cluster_top.sv`: Multi-cluster barrier synchronization and broadcast message distribution verified bit-exact.
+1. `tb/tb_ara_noc_cdc_gals.sv`: 1,000,000 random-packet GALS transfers across asynchronous clock edges; zero corrupted flits.
+2. `tb/tb_ara_multicore_wse_hbm3_top.sv` & `tb/tb_ara_wse_noc_mesh.sv`: Multi-cluster barrier synchronization, 2x2 NoC mesh routing, and broadcast message distribution verified bit-exact.
 
 ---
 
