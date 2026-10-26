@@ -2,6 +2,7 @@
 **16.384 TFLOPS FP16 Multicore SoC, 2x2 NoC Mesh, GALS CDC, 4-Zone PDN, and Base-Die PIM**
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Academic Paper](https://img.shields.io/badge/Research_Paper-Read_PAPER.md-blueviolet.svg)](PAPER.md)
 [![Compute](https://img.shields.io/badge/Compute_Throughput-16.384_TFLOPS_FP16-brightgreen.svg)]()
 [![NoC](https://img.shields.io/badge/NoC_Mesh-2x2_Homogeneous-blue.svg)]()
 [![Clock](https://img.shields.io/badge/Clock_Architecture-GALS_CDC_(2.0G%2F1.25G%2F1.0G)-purple.svg)]()
