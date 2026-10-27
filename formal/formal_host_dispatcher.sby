@@ -1,0 +1,13 @@
+[options]
+mode bmc
+depth 10
+
+[engines]
+smtbmc z3
+
+[script]
+read -formal ara_host_cmd_dispatcher.sv
+prep -top ara_host_cmd_dispatcher
+
+[files]
+rtl/ara_host_cmd_dispatcher.sv
